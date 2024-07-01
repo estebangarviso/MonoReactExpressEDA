@@ -79,6 +79,10 @@ To stop the docker compose services and remove the containers, run the following
 docker-compose down
 ```
 
+## Warning 
+
+- The application is for development purposes only. Do not use it in a production event-streaming are not validating user requests and are not secure. Must implement security measures before deploying to production.
+
 ## Customization
 
 You can customize the application by modifying the `docker-compose.yml` file and the respective Dockerfiles for the frontend and backend.
