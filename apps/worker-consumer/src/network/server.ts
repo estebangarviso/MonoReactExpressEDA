@@ -6,7 +6,6 @@ import cors from 'cors'
 import { IncomingMessage, Server as HttpServer, ServerResponse } from 'http'
 import { RedisProvider } from '../database/redis/provider'
 import { RabbitMQProvider } from '../libs/amqp'
-import applySwagger from '../config/swagger'
 import { subscribeMQ } from './subscribers'
 
 class Server {
@@ -30,7 +29,7 @@ class Server {
     this._app.use(morgan(NODE_ENV === 'development' ? 'dev' : 'combined'))
     this._app.use(express.urlencoded({ extended: false }))
     // Swagger
-    if (NODE_ENV === 'development') applySwagger(this._app)
+    // if (NODE_ENV === 'development') applySwagger(this._app) // Consumer doesn't have Swagger
 
     // applyRoutes(this._app) // Consumer doesn't have routes
   }

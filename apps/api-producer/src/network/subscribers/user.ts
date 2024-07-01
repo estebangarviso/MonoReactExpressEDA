@@ -1,9 +1,8 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { USER_CREATE_PDF, PDF_QUEUE } from '../../constants/user'
-import { PDF_CHANNEL } from '@demo/common'
+import { PDF_CHANNEL, TQueueUserPdf } from '@demo/common'
 import { RabbitMQProvider } from '../../libs/amqp'
-import { TQueueUserPdf } from '../routes/user'
 import PDFDocument from 'pdfkit'
 import UserRepository from '../../database/redis/repositories/user'
 import SocketEventRepository from '../../database/redis/repositories/socket-event'
