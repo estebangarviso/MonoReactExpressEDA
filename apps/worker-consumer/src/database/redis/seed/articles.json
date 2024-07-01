@@ -1,0 +1,25 @@
+[
+  {
+    "sku": "chicken-1",
+    "title": "Freshness Guaranteed Boneless Chicken Breasts Family Pack, 2.13 - 2.85 kg",
+    "shortDescription": "Meat is the edible tissue of animals",
+    "qtyStock": 10,
+    "unitPrice": 26.38,
+    "unity": "kg"
+  },
+  {
+    "sku": "milk-1",
+    "title": "2% Reduced Fat Ultra-Filtered Milk, Lactose Free, 1.54 l",
+    "shortDescription": "Milk is a nutrient-rich liquid food produced by the mammary glands of mammals",
+    "qtyStock": 7,
+    "unitPrice": 3.98,
+    "unity": "l"
+  },
+  {
+    "sku": "cage-eggs-1",
+    "title": "Cage Free Large AA White Eggs, 12 Count",
+    "shortDescription": "These Large Grade AA eggs are ideal for hard boiling or serving up deviled style",
+    "qtyStock": 5,
+    "uniPrice": 3.97
+  }
+]
