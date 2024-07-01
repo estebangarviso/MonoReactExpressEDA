@@ -10,10 +10,10 @@ import testingLibrary from 'eslint-plugin-testing-library';
 import unicorn from 'eslint-plugin-unicorn';
 import vitest from 'eslint-plugin-vitest';
 import globals from 'globals';
-import typescript from 'typescript-eslint';
+// import typescript from 'typescript-eslint';
 
 const SRC_GLOB = '**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}';
-const TYPESCRIPT_GLOB = '**/*.{ts,cts,mts,tsx}';
+// const TYPESCRIPT_GLOB = '**/*.{ts,cts,mts,tsx}';
 const REACT_GLOB = 'src/**/*.{js,cjs,mjs,jsx,ts,cts,mts,tsx}';
 const TEST_GLOB = 'src/**/*.{spec,test}.{js,mjs,cjs,jsx,ts,cts,mts,tsx}';
 const CODE_STYLE_GLOB = '**/*.{js,mjs,cjs,jsx,ts,cts,mts,tsx,json}';
@@ -160,97 +160,97 @@ export default [
 	// #endregion
 
 	// #region typescript
-	typescript.configs.strict[0],
-	{
-		files: [TYPESCRIPT_GLOB],
-		languageOptions: {
-			parserOptions: {
-				emitDecoratorMetadata: true,
-				project: ['tsconfig.json'],
-			},
-		},
-		rules: {
-			...typescript.configs.strict[1].rules,
-			...typescript.configs.strict[2].rules,
-			'@typescript-eslint/ban-types': [
-				ERROR,
-				{
-					types: { Function: false },
-				},
-			],
-			'@typescript-eslint/consistent-type-imports': [
-				WARN,
-				{
-					fixStyle: 'inline-type-imports',
-					prefer: 'type-imports',
-				},
-			],
-			'@typescript-eslint/explicit-function-return-type': OFF,
-			'@typescript-eslint/explicit-module-boundary-types': OFF,
-			'@typescript-eslint/interface-name-prefix': OFF,
-			'@typescript-eslint/no-empty-function': WARN,
-			'@typescript-eslint/no-empty-interface': [
-				ERROR,
-				{ allowSingleExtends: true },
-			],
-			'@typescript-eslint/no-explicit-any': OFF,
-			'@typescript-eslint/no-extraneous-class': OFF,
-			'@typescript-eslint/no-floating-promises': [
-				WARN,
-				{
-					ignoreIIFE: true,
-					ignoreVoid: true,
-				},
-			],
-			'@typescript-eslint/no-namespace': [
-				WARN,
-				{ allowDeclarations: true },
-			],
-			'@typescript-eslint/no-non-null-assertion': OFF,
-			'@typescript-eslint/no-redundant-type-constituents': ERROR,
-			'@typescript-eslint/no-unused-vars': [
-				WARN,
-				{
-					args: 'after-used',
-					caughtErrors: 'all',
-					vars: 'local',
-					varsIgnorePattern: '^_.*',
-				},
-			],
-			'@typescript-eslint/no-use-before-define': [
-				ERROR,
-				{
-					classes: false,
-					enums: true,
-					functions: false,
-					ignoreTypeReferences: true,
-					typedefs: true,
-					variables: true,
-				},
-			],
-			'@typescript-eslint/sort-type-constituents': [
-				WARN,
-				{
-					checkIntersections: true,
-					checkUnions: true,
-					groupOrder: [
-						'named',
-						'keyword',
-						'operator',
-						'literal',
-						'function',
-						'import',
-						'conditional',
-						'object',
-						'tuple',
-						'intersection',
-						'union',
-						'nullish',
-					],
-				},
-			],
-		},
-	},
+	// typescript.configs.strict[0],
+	// {
+	// 	files: [TYPESCRIPT_GLOB],
+	// 	languageOptions: {
+	// 		parserOptions: {
+	// 			emitDecoratorMetadata: true,
+	// 			project: ['tsconfig.json'],
+	// 		},
+	// 	},
+	// 	rules: {
+	// 		...typescript.configs.strict[1].rules,
+	// 		...typescript.configs.strict[2].rules,
+	// 		'@typescript-eslint/ban-types': [
+	// 			ERROR,
+	// 			{
+	// 				types: { Function: false },
+	// 			},
+	// 		],
+	// 		'@typescript-eslint/consistent-type-imports': [
+	// 			WARN,
+	// 			{
+	// 				fixStyle: 'inline-type-imports',
+	// 				prefer: 'type-imports',
+	// 			},
+	// 		],
+	// 		'@typescript-eslint/explicit-function-return-type': OFF,
+	// 		'@typescript-eslint/explicit-module-boundary-types': OFF,
+	// 		'@typescript-eslint/interface-name-prefix': OFF,
+	// 		'@typescript-eslint/no-empty-function': WARN,
+	// 		'@typescript-eslint/no-empty-interface': [
+	// 			ERROR,
+	// 			{ allowSingleExtends: true },
+	// 		],
+	// 		'@typescript-eslint/no-explicit-any': OFF,
+	// 		'@typescript-eslint/no-extraneous-class': OFF,
+	// 		'@typescript-eslint/no-floating-promises': [
+	// 			WARN,
+	// 			{
+	// 				ignoreIIFE: true,
+	// 				ignoreVoid: true,
+	// 			},
+	// 		],
+	// 		'@typescript-eslint/no-namespace': [
+	// 			WARN,
+	// 			{ allowDeclarations: true },
+	// 		],
+	// 		'@typescript-eslint/no-non-null-assertion': OFF,
+	// 		'@typescript-eslint/no-redundant-type-constituents': ERROR,
+	// 		'@typescript-eslint/no-unused-vars': [
+	// 			WARN,
+	// 			{
+	// 				args: 'after-used',
+	// 				caughtErrors: 'all',
+	// 				vars: 'local',
+	// 				varsIgnorePattern: '^_.*',
+	// 			},
+	// 		],
+	// 		'@typescript-eslint/no-use-before-define': [
+	// 			ERROR,
+	// 			{
+	// 				classes: false,
+	// 				enums: true,
+	// 				functions: false,
+	// 				ignoreTypeReferences: true,
+	// 				typedefs: true,
+	// 				variables: true,
+	// 			},
+	// 		],
+	// 		'@typescript-eslint/sort-type-constituents': [
+	// 			WARN,
+	// 			{
+	// 				checkIntersections: true,
+	// 				checkUnions: true,
+	// 				groupOrder: [
+	// 					'named',
+	// 					'keyword',
+	// 					'operator',
+	// 					'literal',
+	// 					'function',
+	// 					'import',
+	// 					'conditional',
+	// 					'object',
+	// 					'tuple',
+	// 					'intersection',
+	// 					'union',
+	// 					'nullish',
+	// 				],
+	// 			},
+	// 		],
+	// 	},
+	// },
 	// #endregion
 
 	// #region react
@@ -265,7 +265,7 @@ export default [
 					JSX: true,
 					React: true,
 				},
-				project: ['tsconfig.json'],
+				// project: ['tsconfig.json'],
 			},
 		},
 		plugins: { react },

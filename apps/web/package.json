@@ -20,8 +20,8 @@
 		"preview:release": "wireit"
 	},
 	"imports": {
-		"#libs/router": "./src/libs/router/index.ts",
-		"#libs/ui": "./src/libs/ui/index.ts"
+		"#libs/router": "./src/libs/router/index.js",
+		"#libs/ui": "./src/libs/ui/index.js"
 	},
 	"author": "Esteban Garviso",
 	"license": "MIT",
@@ -38,7 +38,7 @@
 	],
 	"type": "module",
 	"dependencies": {
-		"@demo/common": "workspace:*",
+		"@demo/common": "*",
 		"@hookform/resolvers": "3.6.0",
 		"@unocss/reset": "0.61.0",
 		"react": "18.3.1",
@@ -116,7 +116,6 @@
 				"src/**",
 				"public/**",
 				"index.html",
-				"tsconfig.json",
 				"vite.config.ts",
 				"env/appsettings.json",
 				"env/dev.env.json",
@@ -134,7 +133,6 @@
 				"src/**",
 				"public/**",
 				"index.html",
-				"tsconfig.json",
 				"vite.config.ts",
 				"env/appsettings.json",
 				"env/release.env.json",

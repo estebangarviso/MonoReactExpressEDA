@@ -3,15 +3,9 @@
 	"private": true,
 	"version": "0.0.1",
 	"description": "Common package for shared libraries.",
-	"main": "./index.ts",
-	"files": [
-		"dist/common/libs/index.js"
-	],
+	"main": "./index.js",
+	"type": "module",
 	"scripts": {
-		"prebuild": "rimraf dist",
-		"build": "tsc",
-		"watch": "tsc -w",
-		"check-types": "tsc --noEmit",
 		"format": "lint-staged"
 	},
 	"keywords": [

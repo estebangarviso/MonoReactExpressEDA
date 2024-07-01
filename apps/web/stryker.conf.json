@@ -16,7 +16,6 @@
 		"**/{index,main}.{ts,cts,mts}",
 		"**/__{tests,mocks,fixtures}__"
 	],
-	"tsconfigFile": "tsconfig.json",
 	"checkers": ["typescript"],
 	"plugins": [
 		"@stryker-mutator/vitest-runner",
