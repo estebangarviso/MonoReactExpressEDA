@@ -1,0 +1,88 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: ./apps/web/Dockerfile
+      args:
+        - ENV=${ENV:-dev}
+    restart: always
+    profiles:
+      - frontend
+    ports:
+      - "8080:${WEB_PORT:-8080}"
+    environment:
+      PROXY: "http://api-producer:${API_PRODUCER_PORT:-8081}"
+    depends_on:
+      - api-producer
+      - worker-consumer
+    networks:
+      - public
+  api-producer:
+    build:
+      context: .
+      dockerfile: ./apps/api-producer/Dockerfile
+      args:
+        - ENV=${ENV:-dev}
+    restart: always
+    environment:
+      REDIS_URI: "redis://redis:6379"
+      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER:-rabbitmq_user}:${RABBITMQ_DEFAULT_PASS:-rabbitmq_pass}@rabbitmq:5672/"
+      ALLOWED_ORIGINS: "http://web:8080"
+    profiles:
+      - backend
+    ports:
+      - "8080:${API_PRODUCER_PORT:-8081}"
+    depends_on:
+      - rabbitmq
+      - redis
+    networks:
+      - private
+      - public
+  worker-consumer:
+    build:
+      context: .
+      dockerfile: ./apps/worker-consumer/Dockerfile
+      args:
+        - ENV=${ENV:-dev}
+    restart: always
+    environment:
+      REDIS_URI: "redis://redis:6379"
+      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER:-rabbitmq_user}:${RABBITMQ_DEFAULT_PASS:-rabbitmq_pass}@localhost:5672/"
+    profiles:
+      - backend
+    depends_on:
+      - api-producer
+      - rabbitmq
+      - redis
+    networks:
+      - private
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_DEFAULT_USER:-rabbitmq_user}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_DEFAULT_PASS:-rabbitmq_pass}
+    volumes:
+      - .rabbitmq_data:/var/lib/rabbitmq:rw
+      - .rabbitmq_config:/etc/rabbitmq/rabbitmq.conf:ro
+    networks:
+      - private
+  redis:
+    image: redis:7.4-rc-alpine
+    restart: always
+    ports:
+      - 6379:6379
+    volumes:
+      - .redis_data:/data:rw
+    networks:
+      - private
+volumes:
+  redis_data:
+  rabbitmq_data:
+  rabbitmq_config:
+networks:
+  public:
+  private:
