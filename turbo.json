@@ -5,6 +5,12 @@
       "dependsOn": ["^build"],
       "outputs": ["dist/**"]
     },
+    "start:dist:release": {
+      "dependsOn": ["^build", "^start:dist:release"]
+    },
+    "start:dist:dev": {
+      "dependsOn": ["^build", "^start:dist:release"]
+    },
     "start:dev": {
       "cache": false,
       "persistent": true,
