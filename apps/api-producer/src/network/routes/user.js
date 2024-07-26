@@ -21,12 +21,11 @@ import response from './response.js'
 import UserRepository from '../../database/redis/repositories/user.js'
 // import UserTransactionRepository from '../../database/redis/repositories/userTransaction'
 import { RabbitMQProvider } from '../../libs/amqp.js'
-import { USER_CREATE_PDF, PDF_QUEUE } from '../../constants/user.js'
 import SocketEventRepository from '../../database/redis/repositories/socket-event.js'
+import { PDF_QUEUE, USER_CREATE_PDF, PDFS_DIR} from '@demo/common/server';
 import { PDFGenerationStatus, PDF_CHANNEL } from '@demo/common';
 import path from 'path'
 import fs from 'fs'
-import { PDFS_DIR } from '../../constants/paths.js'
 
 const UserRouter = Router()
 

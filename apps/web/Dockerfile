@@ -28,7 +28,7 @@ RUN echo "Installing and building the app"
 RUN npm i -g pnpm@${PNPM_VER}
 # prepares source files
 COPY . ${APP_DIR}
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 # builds the app
 ENV NODE_ENV production
 RUN pnpm build:${ENV}

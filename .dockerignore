@@ -55,6 +55,10 @@ coverage
 CHANGELOG.md
 README.md
 LICENSE.md
+diagram.gif
+docker-compose.yml
+commitlint.config.js
+convert_to_js/
 
 # logs
 logs

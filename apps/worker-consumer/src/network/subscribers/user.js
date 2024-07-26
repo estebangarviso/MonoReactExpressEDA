@@ -1,22 +1,24 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { PDF_CHANNEL, PDF_QUEUE } from '@demo/common';
+import { PDF_CHANNEL, PDFGenerationStatus } from '@demo/common'
+import { PDF_QUEUE } from '@demo/common/server'
 import PDFDocument from 'pdfkit'
 import UserRepository from '../../database/redis/repositories/user.js'
 import SocketEventRepository from '../../database/redis/repositories/socket-event.js'
-import fs from 'fs'
 import { ROLES_LIST } from '../../constants/role.js'
-import { PDFGenerationStatus } from '@demo/common';
-import path from 'path'
-import { PDFS_DIR } from '../../constants/paths.js'
+import { AwsS3 } from '../../libs/s3.js'
+import fs from 'fs'
+import url from 'url'
+
+const oneMB = 1024 * 1024
 
 /**
  * Subscribe that receive a message from RabbitMQ and create a PDF file
  */
-export const subscribeUserPdf = async (rabbitmq) => {
+export const subscribeUserPdf = async rabbitmq => {
   await rabbitmq.createQueue(PDF_QUEUE)
   await rabbitmq.subscribeQueue(PDF_QUEUE, async msg => {
     return new Promise(async (resolve, reject) => {
+      const s3 = new AwsS3()
       console.debug('Received message subscribeUserPdf:', msg)
       const {
         idTask,
@@ -32,12 +34,12 @@ export const subscribeUserPdf = async (rabbitmq) => {
       if (!user) {
         console.error(`User not found: ${userId}`)
 
-        return reject();
+        return reject()
       }
 
       // check if user pdf already exists
-      const newPdfPath = path.join(PDFS_DIR, `${user.id}.pdf`)
-      if (fs.existsSync(newPdfPath)) {
+      const newPdfPath = `${user.id}.pdf`
+      if (s3.fileExists(newPdfPath)) {
         console.log(`PDF already exists for user ${user.id}`)
         // save event to notify user that pdf is ready
         const successData = {
@@ -51,7 +53,7 @@ export const subscribeUserPdf = async (rabbitmq) => {
 
         await socketEventRepository.pub()
 
-        return resolve();
+        return resolve()
       }
 
       // transform user info
@@ -60,7 +62,14 @@ export const subscribeUserPdf = async (rabbitmq) => {
         new Date().getFullYear() - new Date(user.birthDate).getFullYear()
 
       const doc = new PDFDocument({ size: 'A4', margin: 50 })
-      const stream = fs.createWriteStream(newPdfPath)
+      // upload to s3
+      const { data } = await s3.uploadMultipart(newPdfPath)
+      const stream = fs.createWriteStream(
+        url.fileURLToPath(new URL(`./${data.Key}`, import.meta.url))
+      )
+
+      s3.writeStreamToS3(stream, data.Key)
+
       doc.pipe(stream)
 
       // title
@@ -94,7 +103,7 @@ export const subscribeUserPdf = async (rabbitmq) => {
         } catch (error) {
           console.error(`Error saving event for user ${user.id}:`, error)
 
-          return reject();
+          return reject()
         }
 
         resolve()
@@ -121,6 +130,6 @@ export const subscribeUserPdf = async (rabbitmq) => {
 
         reject()
       })
-    });
+    })
   })
 }

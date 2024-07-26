@@ -1,0 +1,16 @@
+{
+    "plugins": ["@babel/plugin-syntax-import-assertions"],
+    "presets": [
+      [
+        "minify",
+        {
+          "mangle": false,
+          "keepFnName": true,
+          "keepClassName": true,
+          "removeConsole": false,
+          "removeDebugger": true
+        }
+      ]
+    ]
+  }
+  

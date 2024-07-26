@@ -4,12 +4,15 @@ import { normalizePath } from 'vite';
 import { checker } from 'vite-plugin-checker';
 import { VitePWA as pwa } from 'vite-plugin-pwa';
 import fonts from 'vite-plugin-webfont-dl';
-// import { compilerOptions as tsconfig } from './tsconfig.json';
+import { compilerOptions as tsconfig } from './tsconfig.json';
 
 const FONT_FAMILY = process.env.FONT_FAMILY;
 const FONT_WEIGHTS = process.env.FONT_WEIGHTS;
 const BASE_PATH = normalizePath(`/${process.env.BASE_URL}`);
 
+/**
+ * @type {import('vite').UserConfig}
+ */
 export default {
 	base: BASE_PATH,
 
@@ -27,10 +30,8 @@ export default {
 				},
 			},
 		},
-		sourcemap: true,
-		target: 'esnext',
-		// sourcemap: tsconfig.sourceMap,
-		// target: tsconfig.target,
+		sourcemap: tsconfig.sourceMap,
+		target: tsconfig.target,
 	},
 
 	clearScreen: false,
@@ -92,8 +93,16 @@ export default {
 		proxy: {
 			'/api': {
 				changeOrigin: true,
+				rewrite: (path) => path.replace(/^\/api/v, ''),
 				target: process.env.PROXY,
 			},
 		},
 	},
 };
+
+console.log('[vite.config.js] loaded', {
+	BASE_PATH,
+	FONT_FAMILY,
+	FONT_WEIGHTS,
+	ENVS: process.env,
+});

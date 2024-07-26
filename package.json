@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "demo-monorepo-fullstack-event-driven",
+  "name": "@demo/demo-monorepo-fullstack-event-driven",
   "version": "0.0.1",
   "description": "",
   "type": "module",
@@ -9,7 +9,7 @@
     "start:dev": "turbo start:dev",
     "build:dev": "turbo build:dev",
     "preview:dev": "turbo preview:dev",
-    "start:release": "turbo deploy:dev",
+    "start:release": "turbo start:release",
     "build:release": "turbo build:release",
     "preview:release": "turbo preview:release",
     "prepare": "node .husky/install.mjs",

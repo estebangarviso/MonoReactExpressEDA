@@ -58,15 +58,16 @@ $ pnpm seed:db
 
 <p align="center"><img src="public/Diagram.png" style="height: 300px; width: auto;" /></p>
 
-GitHub Actions CI/CD pipeline is configured to run on every push to the `develop` branch. The pipeline will run the following steps:
+## Manual ECS Deployment Steps
 
-- Checkout the code
-- Configure AWS credentials
-- Login to AWS ECR
-- Prepare task definition file
-- Build the Docker image
-- Push the Docker image to AWS ECR
-- Use new task definition file to update the ECS service with the new image
-- Deploy the application to the ECS service
+### Docker Image Build and Push to AWS ECR
+1. Login to AWS CLI with `aws ecr get-login-password --region us-east-1 --profile <profile-name> | docker login --username AWS --password-stdin <account-id>.dkr.ecr.us-east-1.amazonaws.com`
+2. Build the Docker image with `docker build -t <project>/<env>/<app>:<tag> .`
+3. Tag the Docker image with `docker tag <project>/<env>/<app>:<tag> <account-id>.dkr.ecr.us-east-1.amazonaws.com/<project>/<env>/<app>:<tag>`
+4. Push the Docker image with `docker push <account-id>.dkr.ecr.us-east-1.amazonaws.com/<project>/<env>/<app>:<tag>`
 
-AWS will be in charge give docker the permissions to download app secrets from AWS Secret Manager using a AWS Key Management Service (KMS) and it will deploy the application to the ECS service inside a ECS Cluster. The ECS service, which use Fargate serverless, is configured to run 2 tasks (2 containers) with the application. Also the ECS service is configured to run behind an Application Load Balancer (ALB) that will be used to route traffic to the application (SSL is not configured). Thus so you can access the application using the ALB DNS name through global internet HTTP protocol.
+### ECS Deployment
+1. Create a new task definition with the new image version
+2. Update the service with the new task definition
+3. Wait for the service to be updated
+4. Verify the service is running the new image version

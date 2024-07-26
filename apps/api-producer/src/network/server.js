@@ -1,5 +1,5 @@
-import { NODE_ENV, PORT, ALLOWED_ORIGINS } from '../config/index.js'
-import express from 'express';
+import { NODE_ENV, PORT, ALLOWED_ORIGINS, ENV } from '../config/index.js'
+import express from 'express'
 import compression from 'compression'
 import morgan from 'morgan'
 import cors from 'cors'
@@ -24,7 +24,7 @@ class Server {
     this._app.use(morgan(NODE_ENV === 'development' ? 'dev' : 'combined'))
     this._app.use(express.urlencoded({ extended: false }))
     // Swagger
-    if (NODE_ENV === 'development') applySwagger(this._app)
+    if (ENV === 'dev') applySwagger(this._app)
 
     applyRoutes(this._app)
   }
@@ -33,7 +33,9 @@ class Server {
     try {
       await this._rabbitmq.connect()
       this._server = this._app.listen(PORT, () => {
-        console.success(`Server listening at http://localhost:${PORT} in ${NODE_ENV} mode`)
+        console.success(
+          `Server listening at http://localhost:${PORT} in ${NODE_ENV} mode`
+        )
       })
     } catch (error) {
       console.error(error)

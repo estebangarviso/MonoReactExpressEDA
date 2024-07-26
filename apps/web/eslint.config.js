@@ -41,7 +41,11 @@ export default [
 		files: [SRC_GLOB],
 		languageOptions: {
 			ecmaVersion: 2023,
-			globals: { ...globals.node },
+			globals: {
+				...globals.node,
+				...globals.serviceworker,
+				...globals.browser,
+			},
 			sourceType: 'module',
 		},
 		rules: {
@@ -259,46 +263,47 @@ export default [
 		languageOptions: {
 			parserOptions: {
 				ecmaFeatures: { jsx: true },
+				emitDecoratorMetadata: true,
 				globals: {
 					...globals.serviceworker,
 					...globals.browser,
 					JSX: true,
 					React: true,
 				},
-				// project: ['tsconfig.json'],
+				project: ['tsconfig.json'],
 			},
 		},
 		plugins: { react },
 		rules: {
-			// 'react/destructuring-assignment': [WARN, 'always'],
-			// 'react/display-name': OFF,
-			// 'react/iframe-missing-sandbox': WARN,
-			// 'react/jsx-boolean-value': WARN,
-			// 'react/jsx-curly-brace-presence': [
-			// 	WARN,
-			// 	{
-			// 		children: 'never',
-			// 		propElementValues: 'always',
-			// 		props: 'never',
-			// 	},
-			// ],
-			// 'react/jsx-fragments': [WARN, 'syntax'],
-			// 'react/jsx-key': [
-			// 	ERROR,
-			// 	{
-			// 		checkFragmentShorthand: true,
-			// 		warnOnDuplicates: true,
-			// 	},
-			// ],
-			// 'react/jsx-no-comment-textnodes': WARN,
-			// 'react/jsx-no-duplicate-props': WARN,
-			// 'react/jsx-no-useless-fragment': WARN,
-			// 'react/jsx-pascal-case': WARN,
-			// 'react/jsx-uses-vars': WARN,
-			// 'react/no-danger': ERROR,
-			// 'react/no-multi-comp': WARN,
-			// 'react/prop-types': OFF,
-			// 'react/self-closing-comp': WARN,
+			'react/destructuring-assignment': [WARN, 'always'],
+			'react/display-name': OFF,
+			'react/iframe-missing-sandbox': WARN,
+			'react/jsx-boolean-value': WARN,
+			'react/jsx-curly-brace-presence': [
+				WARN,
+				{
+					children: 'never',
+					propElementValues: 'always',
+					props: 'never',
+				},
+			],
+			'react/jsx-fragments': [WARN, 'syntax'],
+			'react/jsx-key': [
+				ERROR,
+				{
+					checkFragmentShorthand: true,
+					warnOnDuplicates: true,
+				},
+			],
+			'react/jsx-no-comment-textnodes': WARN,
+			'react/jsx-no-duplicate-props': WARN,
+			'react/jsx-no-useless-fragment': WARN,
+			'react/jsx-pascal-case': WARN,
+			'react/jsx-uses-vars': WARN,
+			'react/no-danger': ERROR,
+			'react/no-multi-comp': WARN,
+			'react/prop-types': OFF,
+			'react/self-closing-comp': WARN,
 		},
 	},
 	// #endregion

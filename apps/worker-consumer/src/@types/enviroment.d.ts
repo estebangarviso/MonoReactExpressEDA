@@ -7,6 +7,7 @@ declare global {
       PORT: string
       BASE_URL: string
       NODE_ENV: 'development' | 'production' | 'test' | 'local'
+      ENV: 'dev' | 'release'
       RABBITMQ_URI: string
       REDIS_URI: string
       SALT_ROUNDS: string

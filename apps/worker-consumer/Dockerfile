@@ -35,7 +35,7 @@ RUN apk add --no-cache libc6-compat
 
 WORKDIR ${APP_DIR}
 
-RUN yarn global add pnpm@${PNPM_VERSION} turbo@${TURBO_VERSION}
+RUN npm i -g pnpm@${PNPM_VERSION} turbo@${TURBO_VERSION}
 COPY . .
 
 # Add workspaces to the out directory
@@ -58,12 +58,11 @@ WORKDIR ${APP_DIR}
 # Prepares source files
 RUN echo "Copying necessary files from base image"
 COPY --from=base ${APP_DIR}out/json .
-COPY --from=base ${APP_DIR}pnpm-lock.yaml ./pnpm-lock.yaml
 
 # Build the app
 RUN echo "Installing dependencies and building the app"
 ENV NODE_ENV=${NODE_ENV}
-RUN pnpm install --frozen-lockfile --ignore-scripts --no-optional
+RUN pnpm install --no-frozen-lockfile --ignore-scripts --no-optional
 COPY --from=base ${APP_DIR}out/full .
 RUN pnpm turbo run build:${ENV} --filter=${PKG_NAME}
 
@@ -71,7 +70,6 @@ RUN pnpm turbo run build:${ENV} --filter=${PKG_NAME}
 RUN echo "Removing unnecessary files and dependencies"
 RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 RUN rm -rf \
-  'pnpm-lock.yaml' \
   'node_modules/.bin'
 
 ##

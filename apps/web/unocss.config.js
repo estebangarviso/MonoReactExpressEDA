@@ -6,14 +6,14 @@ import wind from 'unocss/preset-wind';
 const FONT_FAMILY = process.env.FONT_FAMILY;
 
 export default {
-    presets: [typography(), wind({ preflight: true }), icons({ prefix: '' })],
+	presets: [typography(), wind({ preflight: true }), icons({ prefix: '' })],
 
-    theme: {
+	theme: {
 		fontFamily: {
 			sans: [FONT_FAMILY, 'sans-serif'],
 			serif: [FONT_FAMILY, 'serif'],
 		},
 	},
 
-    transformers: [transformerDirectives(), transformerVariantGroup()]
+	transformers: [transformerDirectives(), transformerVariantGroup()],
 };

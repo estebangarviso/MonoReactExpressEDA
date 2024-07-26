@@ -66,5 +66,6 @@ export const SSEPDFChannelProvider = ({ children }) => {
 		};
 	}, []);
 
+	// eslint-disable-next-line react/jsx-no-useless-fragment
 	return <>{children}</>;
 };
