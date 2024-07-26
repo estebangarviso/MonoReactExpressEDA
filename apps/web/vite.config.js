@@ -99,10 +99,3 @@ export default {
 		},
 	},
 };
-
-console.log('[vite.config.js] loaded', {
-	BASE_PATH,
-	FONT_FAMILY,
-	FONT_WEIGHTS,
-	ENVS: process.env,
-});
