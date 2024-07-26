@@ -6,7 +6,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "start": "turbo start",
+    "start:dist:release": "turbo start:dist:release",
+    "start:dist:dev": "turbo start:dist:dev",
     "start:dev": "turbo start:dev",
     "build:dev": "turbo build:dev",
     "preview:dev": "turbo preview:dev",
