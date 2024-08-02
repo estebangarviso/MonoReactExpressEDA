@@ -9,33 +9,33 @@ services:
       args:
         - ENV=$ENV
     restart: always
-    depends_on:
-      - api-producer
+    # depends_on:
+    #   - api-producer
     networks:
       - public
-  api-producer:
-    container_name: '${PROJECT_NAME}_${ENV}_api-producer'
-    build:
-      context: .
-      dockerfile: ./apps/api-producer/Dockerfile
-      args:
-        - ENV=$ENV
-    restart: always
-    networks:
-      - private
-      - public
-  worker-consumer:
-    container_name: '${PROJECT_NAME}_${ENV}_worker-consumer'
-    build:
-      context: .
-      dockerfile: ./apps/worker-consumer/Dockerfile
-      args:
-        - ENV=$ENV
-    restart: always
-    depends_on:
-      - api-producer
-    networks:
-      - private
+  # api-producer:
+  #   container_name: '${PROJECT_NAME}_${ENV}_api-producer'
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/api-producer/Dockerfile
+  #     args:
+  #       - ENV=$ENV
+  #   restart: always
+  #   networks:
+  #     - private
+  #     - public
+  # worker-consumer:
+  #   container_name: '${PROJECT_NAME}_${ENV}_worker-consumer'
+  #   build:
+  #     context: .
+  #     dockerfile: ./apps/worker-consumer/Dockerfile
+  #     args:
+  #       - ENV=$ENV
+  #   restart: always
+  #   depends_on:
+  #     - api-producer
+  #   networks:
+  #     - private
 volumes:
   redis_data:
   rabbitmq_data:
