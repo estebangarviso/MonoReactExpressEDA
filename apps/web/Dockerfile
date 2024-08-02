@@ -87,10 +87,9 @@ ARG PORT
 WORKDIR '/usr/share/nginx/html'
 # retrieves build app
 RUN rm -rf ./*
-COPY --from=installer ${APP_DIR} ${APP_DIR}
+COPY --from=installer ${APP_DIR}${WEB_DIR}${OUT_DIR} ./
 COPY --from=builder ${APP_DIR}'apps/web/nginx.conf' '/etc/nginx/conf.d/default.conf'
-# Create a symbolic link to built app
-RUN ln -s ${APP_DIR}${WEB_DIR}${OUT_DIR} ./
+
 # alpine security updates
 RUN apk --no-cache -U upgrade
 

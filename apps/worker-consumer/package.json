@@ -19,6 +19,8 @@
     "preview:release": "env -e release -m debug --log debug : node dist/index.js",
     "build:dev": "rimraf dist && env -e dev -m build --log debug : babel src -d dist",
     "build:release": "rimraf dist && env -e release -m build --log debug : babel src -d dist",
+    "run:dev": "env -e dev -m build --log debug : node dist/index.js",
+    "run:release": "env -e release -m build --log debug : node dist/index.js",
     "test": "jest",
     "test:watch": "jest -- --watch",
     "test:verbose": "jest -- --verbose",

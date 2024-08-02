@@ -71,8 +71,7 @@ RUN npx turbo run build:${ENV} --filter=${SERVICE_PKG_NAME}
 RUN wget https://gobinaries.com/tj/node-prune --output-document - | /bin/sh && node-prune
 RUN rm -rf \
   'package.json' \
-  'pnpm-lock.yaml' \
-  'node_modules/.bin'
+  'pnpm-lock.yaml'
 
 ##
 ## STAGE 2: exec
@@ -85,6 +84,8 @@ ARG TIME_ZONE
 ARG NODE_ENV
 ARG PORT
 ARG HOSTNAME
+ARG ENV
+ARG SERVICE_PKG_NAME
 ARG AWS_ACCESS_KEY_ID
 ARG AWS_SECRET_ACCESS_KEY
 
@@ -112,7 +113,8 @@ ENV PORT=${PORT}
 ENV HOSTNAME=${HOSTNAME}
 ENV LANG=${LANG}
 ENV TZ=${TIME_ZONE}
+ENV ENV=${ENV}
 
 # exec command
 RUN echo "Running the service in ${NODE_ENV} mode..."
-CMD ["node", "apps/api-producer/dist/index.js"]
+CMD ["node", "apps/worker-consumer/dist/index.js"]

@@ -6,7 +6,6 @@ import cors from 'cors'
 import { RedisProvider } from '../database/redis/provider.js'
 import { RabbitMQProvider } from '../libs/amqp.js'
 import applyRoutes from './router.js'
-import applySwagger from '../config/swagger/index.js'
 
 class Server {
   constructor() {
@@ -23,8 +22,6 @@ class Server {
     this._app.use(express.json())
     this._app.use(morgan(NODE_ENV === 'development' ? 'dev' : 'combined'))
     this._app.use(express.urlencoded({ extended: false }))
-    // Swagger
-    if (ENV === 'dev') applySwagger(this._app)
 
     applyRoutes(this._app)
   }

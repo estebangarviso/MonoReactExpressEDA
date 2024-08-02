@@ -73,28 +73,30 @@ __*Important: Allow docker to create volumes in this directory. For Docker Deskt
 
 ## Production Deployment
 
-Use `docker-compose.yml` file to deploy the application in production. Make sure to update the .env file for `docker-compose.yml`, you have to rename the `.env.example` file to `.env` and update the values as per your setup, then run the following command to build the images:
+Use `docker-compose.yml` file to deploy the application in production. Make sure to update the .env file for `docker-compose.yml`, you have to rename the `.env.example` file to `.env` and update the values as per your setup. Also there's a `docker-compose.dev.yml` file which is used for development purposes and runs rabbitmq and redis services locally plus the services in the docker containers.
+
+Then run the following command to build the images:
 
 ```bash
-docker compose build
+docker compose build # to build the images
 ```
 
 Then run the following command to start the services:
 
 ```bash
-docker compose up -d
+docker compose up -d # to start the services
 ```
 
 To stop the services, run the following command:
 
 ```bash
-docker compose down
+docker compose down # to stop the services
 ```
 
 To view the logs, run the following command:
 
 ```bash
-docker compose logs -f
+docker compose s -f # to view the logs of the services
 ```
 
 Check health of the services:
