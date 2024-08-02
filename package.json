@@ -1,6 +1,6 @@
 {
   "$schema": "https://json.schemastore.org/package.json",
-  "name": "@demo/demo-monorepo-fullstack-event-driven",
+  "name": "@demo/mono-react-express-eda",
   "version": "0.0.1",
   "description": "",
   "type": "module",

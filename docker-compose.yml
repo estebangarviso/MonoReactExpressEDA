@@ -1,63 +1,52 @@
 services:
   web:
+    container_name: '${PROJECT_NAME}_${ENV}_web'
+    profiles:
+      - production
+    ports:
+      - "8080:8080"
     build:
       context: .
       dockerfile: ./apps/web/Dockerfile
       args:
-        - ENV=${ENV:-dev}
+        - ENV=$ENV
     restart: always
-    profiles:
-      - frontend
-    ports:
-      - "8080:${WEB_PORT:-8080}"
-    environment:
-      PROXY: "http://api-producer:${API_PRODUCER_PORT:-8081}"
     depends_on:
       - api-producer
       - worker-consumer
     networks:
       - public
   api-producer:
+    container_name: '${PROJECT_NAME}_${ENV}_api-producer'
+    profiles:
+      - production
     build:
       context: .
       dockerfile: ./apps/api-producer/Dockerfile
       args:
-        - ENV=${ENV:-dev}
+        - ENV=$ENV
     restart: always
-    environment:
-      REDIS_URI: "redis://redis:6379"
-      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER:-rabbitmq_user}:${RABBITMQ_DEFAULT_PASS:-rabbitmq_pass}@rabbitmq:5672/"
-      ALLOWED_ORIGINS: "http://web:8080"
-    profiles:
-      - backend
-    ports:
-      - "8080:${API_PRODUCER_PORT:-8081}"
-    depends_on:
-      - rabbitmq
-      - redis
     networks:
       - private
       - public
   worker-consumer:
+    container_name: '${PROJECT_NAME}_${ENV}_worker-consumer'
+    profiles:
+      - production
     build:
       context: .
       dockerfile: ./apps/worker-consumer/Dockerfile
       args:
-        - ENV=${ENV:-dev}
+        - ENV=$ENV
     restart: always
-    environment:
-      REDIS_URI: "redis://redis:6379"
-      RABBITMQ_URI: "amqp://${RABBITMQ_DEFAULT_USER:-rabbitmq_user}:${RABBITMQ_DEFAULT_PASS:-rabbitmq_pass}@localhost:5672/"
-    profiles:
-      - backend
     depends_on:
       - api-producer
-      - rabbitmq
-      - redis
     networks:
       - private
   rabbitmq:
     image: rabbitmq:3-management
+    profiles:
+      - local
     restart: always
     ports:
       - "5672:5672"
@@ -71,7 +60,9 @@ services:
     networks:
       - private
   redis:
-    image: redis:7.4-rc-alpine
+    image: redis:7.0-rc-alpine
+    profiles:
+      - local
     restart: always
     ports:
       - 6379:6379

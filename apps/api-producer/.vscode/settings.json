@@ -16,4 +16,7 @@
   "eslint.useESLintClass": true,
   "eslint.validate": ["javascript", "typescript" ],
   "sonarlint.disableTelemetry": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
 }

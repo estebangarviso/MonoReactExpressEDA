@@ -1,6 +1,6 @@
 // eslint-disable-next-line eslint-comments/disable-enable-pair
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { Router } from 'express';
+import { Router } from 'express'
 import httpErrors from 'http-errors'
 import {
   queueUserPdfSchema,
@@ -21,11 +21,12 @@ import response from './response.js'
 import UserRepository from '../../database/redis/repositories/user.js'
 // import UserTransactionRepository from '../../database/redis/repositories/userTransaction'
 import { RabbitMQProvider } from '../../libs/amqp.js'
+import { AwsS3 } from '../../libs/s3.js'
 import SocketEventRepository from '../../database/redis/repositories/socket-event.js'
-import { PDF_QUEUE, USER_CREATE_PDF, PDFS_DIR} from '@demo/common/server';
-import { PDFGenerationStatus, PDF_CHANNEL } from '@demo/common';
-import path from 'path'
-import fs from 'fs'
+import { PDF_QUEUE, USER_CREATE_PDF } from '@demo/common/server'
+import { PDFGenerationStatus, PDF_CHANNEL } from '@demo/common'
+import { createWriteStream } from 'fs'
+import { Readable } from 'stream'
 
 const UserRouter = Router()
 
@@ -44,24 +45,27 @@ UserRouter.route('/v1/user').get(verifyUser(), async (req, res, next) => {
   }
 })
 
-UserRouter.route('/v1/user/profile').get(verifyUser(), async (req, res, next) => {
-  try {
-    const { currentUser } = req
-    if (!currentUser) throw new httpErrors.Unauthorized('Unauthorized')
+UserRouter.route('/v1/user/profile').get(
+  verifyUser(),
+  async (req, res, next) => {
+    try {
+      const { currentUser } = req
+      if (!currentUser) throw new httpErrors.Unauthorized('Unauthorized')
 
-    const userRepository = new UserRepository({ id: currentUser.id })
-    const profile = await userRepository.getByID()
+      const userRepository = new UserRepository({ id: currentUser.id })
+      const profile = await userRepository.getByID()
 
-    response({
-      error: false,
-      details: profile,
-      res,
-      status: 200
-    })
-  } catch (error) {
-    next(error)
+      response({
+        error: false,
+        details: profile,
+        res,
+        status: 200
+      })
+    } catch (error) {
+      next(error)
+    }
   }
-})
+)
 
 // UserRouter.route('/v1/user/balance').get(verifyUser(), async (req, res, next) => {
 //   try {
@@ -85,24 +89,28 @@ UserRouter.route('/v1/user/profile').get(verifyUser(), async (req, res, next) =>
 //   }
 // })
 
-UserRouter.route('/v1/user/signup').post(validatorCompiler(storeUserSchema, 'body'), async (req, res, next) => {
-  try {
-    const { body } = req
+UserRouter.route('/v1/user/signup').post(
+  validatorCompiler(storeUserSchema, 'body'),
+  async (req, res, next) => {
+    try {
+      const { body } = req
 
-    const userRepository = new UserRepository(body)
+      const userRepository = new UserRepository(body)
 
-    const savedUser = await userRepository.save()
+      const savedUser = await userRepository.save()
 
-    response({
-      error: false,
-      details: savedUser,
-      res,
-      status: 201
-    })
-  } catch (error) {
-    next(error)
+      response({
+        error: false,
+        details: savedUser,
+        res,
+        status: 201
+      })
+    } catch (error) {
+      console.log('Error:', error)
+      next(error)
+    }
   }
-})
+)
 
 UserRouter.route('/v1/users').get(async (req, res, next) => {
   try {
@@ -120,66 +128,93 @@ UserRouter.route('/v1/users').get(async (req, res, next) => {
   }
 })
 
-UserRouter.route('/v1/user/pdf').post(validatorCompiler(queueUserPdfSchema, 'body'), async (req, res, next) => {
-  try {
-    const { userId } = req.body
-
-    const payload = {
-      idTask: USER_CREATE_PDF,
-      details: {
-        userId
-      }
-    }
-    const result = RabbitMQProvider.getInstance().publishQueue(PDF_QUEUE, JSON.stringify(payload))
-    if (!result)
-      throw new httpErrors.InternalServerError('Error publishing message')
-
+UserRouter.route('/v1/user/pdf').post(
+  validatorCompiler(queueUserPdfSchema, 'body'),
+  async (req, res, next) => {
     try {
-      const pendingdata = {
-        userId,
-        state: PDFGenerationStatus.PENDING
+      const { userId } = req.body
+
+      const payload = {
+        idTask: USER_CREATE_PDF,
+        details: {
+          userId
+        }
       }
-      const socketEventRepository = new SocketEventRepository(PDF_CHANNEL, {
-        eventName: USER_CREATE_PDF,
-        data: pendingdata
+      const result = RabbitMQProvider.getInstance().publishQueue(
+        PDF_QUEUE,
+        JSON.stringify(payload)
+      )
+      if (!result)
+        throw new httpErrors.InternalServerError('Error publishing message')
+
+      try {
+        const pendingdata = {
+          userId,
+          state: PDFGenerationStatus.PENDING
+        }
+        const socketEventRepository = new SocketEventRepository(PDF_CHANNEL, {
+          eventName: USER_CREATE_PDF,
+          data: pendingdata
+        })
+
+        await socketEventRepository.pub()
+      } catch (error) {
+        console.error('Error saving event:', error)
+        throw new httpErrors.UnprocessableEntity('Error saving event')
+      }
+
+      response({
+        error: false,
+        details: 'Pdf generation started',
+        res,
+        status: 200
       })
-
-      await socketEventRepository.pub()
     } catch (error) {
-      console.error('Error saving event:', error)
-      throw new httpErrors.UnprocessableEntity('Error saving event')
+      next(error)
     }
-
-    response({
-      error: false,
-      details: 'Pdf generation started',
-      res,
-      status: 200
-    })
-  } catch (error) {
-    next(error)
   }
-})
+)
 
-UserRouter.route('/v1/user/pdf/download').post(validatorCompiler(userPdfDownloadSchema, 'body'), (req, res) => {
-  // Stream the PDF file
-  const userId = req.body.userId
-  if (!userId)
-    throw new httpErrors.BadRequest('Missing required field: userId')
-  const pdfPath = path.join(PDFS_DIR, `${userId}.pdf`)
+UserRouter.route('/v1/user/pdf/download').post(
+  validatorCompiler(userPdfDownloadSchema, 'body'),
+  async (req, res, next) => {
+    try {
+      // Stream the PDF file
+      const userId = req.body.userId
+      if (!userId)
+        throw new httpErrors.BadRequest('Missing required field: userId')
 
-  if (!fs.existsSync(pdfPath))
-    throw new httpErrors.NotFound('PDF file not found')
+      // Check if the file exists in S3
+      const pdfPath = `${userId}.pdf`
+      const s3 = new AwsS3()
+      const exists = await s3.fileExists(pdfPath)
+      if (!exists) throw new httpErrors.NotFound('PDF file not found')
+      // Stream the file from S3
+      const stream = createWriteStream(pdfPath)
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader('Content-Disposition', `attachment; filename=${pdfPath}`)
 
-  res.download(pdfPath, `user-${userId}.pdf`, err => {
-    if (err) throw new httpErrors.InternalServerError('Error downloading PDF')
-  })
+      const s3File = await s3.getFile({ filename: pdfPath })
+      const readableStream = s3File.Body?.transformToWebStream()
 
-  // Delete the PDF file (optional)
-  // fs.unlink(pdfPath, err => {
-  //   if (err) console.error('Error deleting PDF file:', err)
-  // })
-})
+      if (!readableStream) throw new httpErrors.NotFound('PDF file not found')
+
+      // Pipe the stream to the response
+      const reader = readableStream.getReader()
+      const pump = () =>
+        reader.read().then(({ done, value }) => {
+          if (done) return
+          res.write(value)
+          return pump()
+        })
+      pump().then(() => {
+        res.end()
+      })
+    } catch (error) {
+      next(error)
+    }
+  }
+)
 
 UserRouter.route('/v1/user/login').post(
   validatorCompiler(userLoginSchema, 'body'),
@@ -205,7 +240,7 @@ UserRouter.route('/v1/user/login').post(
           },
           res,
           status: 200
-        });
+        })
 
       throw new httpErrors.Unauthorized('You are not registered')
     } catch (error) {
@@ -216,75 +251,75 @@ UserRouter.route('/v1/user/login').post(
 
 UserRouter.route('/v1/user/:id')
   .get(
-  validatorCompiler(userIDSchema, 'params'),
-  verifyIsCurrentUser(),
-  async (req, res, next) => {
-    try {
+    validatorCompiler(userIDSchema, 'params'),
+    verifyIsCurrentUser(),
+    async (req, res, next) => {
+      try {
+        const {
+          params: { id: userId }
+        } = req
+        const userRepository = new UserRepository({ id: userId })
+
+        response({
+          error: false,
+          details: await userRepository.getByID(),
+          res,
+          status: 200
+        })
+      } catch (error) {
+        next(error)
+      }
+    }
+  )
+  .delete(
+    validatorCompiler(userIDSchema, 'params'),
+    verifyIsCurrentUser(),
+    async (req, res, next) => {
+      try {
+        const {
+          params: { id }
+        } = req
+        const userRepository = new UserRepository({ id })
+
+        response({
+          error: false,
+          details: await userRepository.deleteByID(),
+          res,
+          status: 200
+        })
+      } catch (error) {
+        next(error)
+      }
+    }
+  )
+  .patch(
+    validatorCompiler(userIDSchema, 'params'),
+    validatorCompiler(updateUserSchema, 'body'),
+    verifyIsCurrentUser(),
+    async (req, res, next) => {
       const {
+        body: { firstName, lastName, email, password },
         params: { id: userId }
       } = req
-      const userRepository = new UserRepository({ id: userId })
 
-      response({
-        error: false,
-        details: await userRepository.getByID(),
-        res,
-        status: 200
-      })
-    } catch (error) {
-      next(error)
+      try {
+        response({
+          error: false,
+          details: await new UserRepository({
+            id: userId,
+            firstName,
+            lastName,
+            email,
+            password
+          }).updateOneUser(),
+          res,
+          status: 200
+        })
+      } catch (error) {
+        next(error)
+      }
     }
-  }
-)
-  .delete(
-  validatorCompiler(userIDSchema, 'params'),
-  verifyIsCurrentUser(),
-  async (req, res, next) => {
-    try {
-      const {
-        params: { id }
-      } = req
-      const userRepository = new UserRepository({ id })
-
-      response({
-        error: false,
-        details: await userRepository.deleteByID(),
-        res,
-        status: 200
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-)
-  .patch(
-  validatorCompiler(userIDSchema, 'params'),
-  validatorCompiler(updateUserSchema, 'body'),
-  verifyIsCurrentUser(),
-  async (req, res, next) => {
-    const {
-      body: { firstName, lastName, email, password },
-      params: { id: userId }
-    } = req
-
-    try {
-      response({
-        error: false,
-        details: (await new UserRepository({
-          id: userId,
-          firstName,
-          lastName,
-          email,
-          password
-        }).updateOneUser()),
-        res,
-        status: 200
-      })
-    } catch (error) {
-      next(error)
-    }
-  }
-)
+  )
 
 UserRouter.route('/v1/user/refreshAccessToken/:id').get(
   validatorCompiler(userIDSchema, 'params'),

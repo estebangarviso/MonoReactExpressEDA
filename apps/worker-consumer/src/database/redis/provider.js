@@ -1,14 +1,15 @@
 /* eslint-disable eslint-comments/disable-enable-pair */
 import Redis from 'ioredis'
-import { REDIS_URI } from '../../config/index.js'
+import { REDIS_URI, REDIS_CLUSTER_NAME } from '../../config/index.js'
+import RedisCluster from './cluster.js'
+import { PRODUCER_APP_NAME } from '@demo/common/server'
 const DELETE_PREFIX = 'del:'
 const INDEX_PREFIX = 'idx:'
-import { PRODUCER_APP_NAME } from '@demo/common/server'
 
 export class RedisProvider {
   constructor(prefix) {
     this._prefix = `${PRODUCER_APP_NAME}${prefix ? `:${prefix}` : ''}`
-    this._main = new Redis(REDIS_URI)
+    this._main = REDIS_CLUSTER_NAME ? RedisCluster() : new Redis(REDIS_URI)
 
     this._main.on('connect', () => {
       console.success(

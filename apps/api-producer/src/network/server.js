@@ -37,6 +37,7 @@ class Server {
           `Server listening at http://localhost:${PORT} in ${NODE_ENV} mode`
         )
       })
+      await this._redis.seed()
     } catch (error) {
       console.error(error)
     }

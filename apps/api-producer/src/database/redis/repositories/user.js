@@ -15,9 +15,7 @@ import { ROLES } from '../../../constants/role.js'
 
 export default class UserRepository {
   // Make optional to add constructor params
-  constructor(
-    args = {}
-  ) {
+  constructor(args = {}) {
     const {
       id = '',
       firstName = '',
@@ -62,7 +60,6 @@ export default class UserRepository {
 
     if (!this._password)
       throw new httpErrors.BadRequest('Missing required field: password')
-
     if (!this._roleId)
       throw new httpErrors.BadRequest('Missing required field: roleId')
 
@@ -83,19 +80,6 @@ export default class UserRepository {
       roleId: role.id,
       secureToken: nanoid(33)
     }
-
-    console.log(
-      'User to save:',
-      user,
-      'Role ID:',
-      this._roleId,
-      'Role:',
-      role,
-      'Role ID type:',
-      typeof role.id,
-      'Role type:',
-      typeof role
-    )
 
     const savedUser = await createUser(user)
 
@@ -156,7 +140,7 @@ export default class UserRepository {
 
     if (updatePassword) user.password = await hashPassword(this._password)
 
-    return await updateOneUser(user);
+    return await updateOneUser(user)
   }
 
   async login() {

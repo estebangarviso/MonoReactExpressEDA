@@ -1,4 +1,3 @@
-import producerApp from '../../../apps/api-producer/package.json' assert { type: 'json' };
 import path from 'path'
 import url from 'url'
 
@@ -8,4 +7,4 @@ export const PDFS_DIR = path.join(APP_PRODUCER_ROOT_DIR, 'pdfs')
 
 export const PDF_QUEUE = 'pdf:queue';
 export const USER_CREATE_PDF = 'user:create-pdf';
-export const PRODUCER_APP_NAME = producerApp.name;
+export const PRODUCER_APP_NAME = '@demo/api-producer';

@@ -29,9 +29,13 @@
     "format": "lint-staged"
   },
   "dependencies": {
+    "@aws-crypto/sha256-js": "^5.2.0",
     "@aws-sdk/client-s3": "^3.614.0",
+    "@aws-sdk/credential-providers": "^3.621.0",
     "@aws-sdk/lib-storage": "^3.616.0",
     "@aws-sdk/node-http-handler": "^3.374.0",
+    "@aws-sdk/signature-v4": "^3.374.0",
+    "@aws-sdk/util-format-url": "^3.609.0",
     "@demo/common": "*",
     "@sinclair/typebox": "0.31.17",
     "@v10e/env": "2.11.2",

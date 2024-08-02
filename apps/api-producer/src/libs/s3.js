@@ -21,13 +21,13 @@ import {
   HeadObjectCommand,
   S3
 } from '@aws-sdk/client-s3'
+import { fromEnv, fromNodeProviderChain } from '@aws-sdk/credential-providers'
 import { RequestHandler } from './node-http-handler.js'
 import moment from 'moment'
 import { S3_BUCKET } from '../config/index.js'
 import { nanoid } from 'nanoid'
 import { RedisProvider } from '../database/redis/provider.js'
 import { AWS_REGION } from '../config/index.js'
-import { fromEnv, fromNodeProviderChain } from '@aws-sdk/credential-providers'
 
 export const getS3FilePath = filename => {
   return decodeURIComponent(filename.replace(/\+/g, ' '))
@@ -38,7 +38,6 @@ export const buildS3FilePath = (filename, auto = false) => {
 
   return `${filename}`
 }
-
 // Amazon S3 multipart upload limits
 // see https://docs.aws.amazon.com/es_es/AmazonS3/latest/userguide/qfacts.html
 const MIN_MULTIPART_SIZE = 5_242_880 // 5 MiB
@@ -74,7 +73,8 @@ export class AwsS3 {
       ContentType: contentType,
       Metadata: {
         uploadedAt: moment().toISOString()
-      }
+      },
+      ACL: 'public-read'
     }
 
     return this.client.send(new PutObjectCommand(params))
@@ -264,7 +264,6 @@ export class AwsS3 {
       this.redis.delete(key)
 
       return {
-        region: AWS_REGION,
         key,
         bucket: Bucket,
         data: dataComplete
@@ -426,7 +425,6 @@ export class AwsS3 {
       this.redis.delete(key)
 
       return {
-        region: AWS_REGION,
         key,
         bucket: Bucket
       }

@@ -1,11 +1,9 @@
-import server from '../../../network/server'
+import server from '../../../network/server.js'
 import axios from 'axios'
 import { faker } from '@faker-js/faker'
-// import currencies from './currencies.json'
-import roles from './roles.json'
 import { nanoid } from 'nanoid'
-import { ROLES } from '../../../constants/role'
-import '../../../config/axios'
+import { ROLES, ROLES_LIST } from '../../../constants/role.js'
+import '../../../config/axios.js'
 
 const fakeAdmin = {
   firstName: faker.person.firstName(),
@@ -39,7 +37,7 @@ let userId = ''
 
 const seedRoles = async () => {
   try {
-    for (const role of roles) {
+    for (const role of ROLES_LIST) {
       const response = await axios.post('/v1/role', role)
       if (response.status !== 201)
         console.error(`Error importing role ${role.name}`)
@@ -75,7 +73,8 @@ const createFakeCustomers = async () => {
     secureToken: nanoid(33)
   }))
   const promises = customers.map(customer =>
-    axios.post('/v1/user/signup', customer))
+    axios.post('/v1/user/signup', customer)
+  )
   const responses = await Promise.all(promises)
 
   responses.forEach((response, index) => {
@@ -132,8 +131,7 @@ const deleteFakeAdmin = async () => {
   else console.log(`Admin deleted`)
 }
 
-const main = async () => {
-  await server.start()
+export const seed = async () => {
   // await seedCurrencies()
   await seedRoles()
   await createFakeAdmin()
@@ -141,9 +139,22 @@ const main = async () => {
   await createFakeCustomers()
   // await seedArticles()
   await deleteFakeAdmin()
-  await server.stop()
+}
 
+const main = async () => {
+  try {
+    await server.start()
+    await seed()
+    await server.stop()
+  } catch (error) {
+    console.error(error)
+  }
   process.exit(0)
 }
 
-void main()
+// Call a function if this file was run directly. This allows the file
+// to be runnable without running on import.
+import { fileURLToPath } from 'url'
+if (process.argv[1] === fileURLToPath(import.meta.url)) {
+  main()
+}

@@ -57,6 +57,7 @@ README.md
 LICENSE.md
 diagram.gif
 docker-compose.yml
+docker-compose.dev.yml
 commitlint.config.js
 convert_to_js/
 

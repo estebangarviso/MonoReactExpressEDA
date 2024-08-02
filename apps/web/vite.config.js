@@ -90,12 +90,5 @@ export default {
 		cors: true,
 		open: false,
 		port: +process.env.PORT,
-		proxy: {
-			'/api': {
-				changeOrigin: true,
-				rewrite: (path) => path.replace(/^\/api/v, ''),
-				target: process.env.PROXY,
-			},
-		},
 	},
 };

@@ -14,6 +14,9 @@
   "eslint.probe": ["javascript", "typescript", "json"],
   "eslint.trace.server": "off",
   "eslint.useESLintClass": true,
-  "eslint.validate": ["javascript", "typescript" ],
+  "eslint.validate": ["javascript", "typescript"],
   "sonarlint.disableTelemetry": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
 }
