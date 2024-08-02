@@ -16,7 +16,7 @@
     "preview:release": "turbo preview:release",
     "prepare": "node .husky/install.mjs",
     "format": "turbo format",
-    "to-js": "convert_to_js/toJS.sh"
+    "pm2:dev": "env -e dev -m debug --log debug : pm2 start ecosystem.config.js"
   },
   "author": "",
   "license": "MIT",
