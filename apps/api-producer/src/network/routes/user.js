@@ -20,12 +20,12 @@ import {
 import response from './response.js'
 import UserRepository from '../../database/redis/repositories/user.js'
 // import UserTransactionRepository from '../../database/redis/repositories/userTransaction'
-import { RabbitMQProvider } from '../../libs/amqp.js'
+import RabbitMQProvider from '../../libs/amqp.js'
 import { AwsS3 } from '../../libs/s3.js'
 import SocketEventRepository from '../../database/redis/repositories/socket-event.js'
 import { PDF_QUEUE, USER_CREATE_PDF } from '@demo/common/server'
 import { PDFGenerationStatus, PDF_CHANNEL } from '@demo/common'
-import { createWriteStream } from 'fs'
+// import { createWriteStream } from 'fs'
 import { Readable } from 'stream'
 
 const UserRouter = Router()
@@ -140,7 +140,7 @@ UserRouter.route('/v1/user/pdf').post(
           userId
         }
       }
-      const result = RabbitMQProvider.getInstance().publishQueue(
+      const result = RabbitMQProvider.publishQueue(
         PDF_QUEUE,
         JSON.stringify(payload)
       )
@@ -148,13 +148,13 @@ UserRouter.route('/v1/user/pdf').post(
         throw new httpErrors.InternalServerError('Error publishing message')
 
       try {
-        const pendingdata = {
+        const pendingData = {
           userId,
           state: PDFGenerationStatus.PENDING
         }
         const socketEventRepository = new SocketEventRepository(PDF_CHANNEL, {
           eventName: USER_CREATE_PDF,
-          data: pendingdata
+          data: pendingData
         })
 
         await socketEventRepository.pub()
@@ -186,30 +186,45 @@ UserRouter.route('/v1/user/pdf/download').post(
 
       // Check if the file exists in S3
       const pdfPath = `${userId}.pdf`
-      const s3 = new AwsS3()
-      const exists = await s3.fileExists(pdfPath)
-      if (!exists) throw new httpErrors.NotFound('PDF file not found')
-      // Stream the file from S3
-      const stream = createWriteStream(pdfPath)
-      res.setHeader('Content-Type', 'application/pdf')
-      res.setHeader('Content-Disposition', `attachment; filename=${pdfPath}`)
 
-      const s3File = await s3.getFile({ filename: pdfPath })
-      const readableStream = s3File.Body?.transformToWebStream()
+      // Check Redis cache first
+      const userRepository = new UserRepository({ id: userId })
+      const cachedPdfBuffer = await userRepository.getPDF()
+      if (cachedPdfBuffer) {
+        console.log('PDF found in cache');
 
-      if (!readableStream) throw new httpErrors.NotFound('PDF file not found')
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=${pdfPath}`);
+        return res.send(cachedPdfBuffer);
+      } else {
+        console.log('PDF not found in cache - fetching from S3');
+        const s3 = new AwsS3()
+        const exists = await s3.fileExists(pdfPath)
+        if (!exists) throw new httpErrors.NotFound('PDF file not found')
 
-      // Pipe the stream to the response
-      const reader = readableStream.getReader()
-      const pump = () =>
-        reader.read().then(({ done, value }) => {
-          if (done) return
-          res.write(value)
-          return pump()
-        })
-      pump().then(() => {
-        res.end()
-      })
+        // Retrieve the file from S3 as a buffer
+        const s3File = await s3.getFile({ filename: pdfPath })
+        const readableStream = s3File.Body?.transformToWebStream()
+
+        if (!readableStream) throw new httpErrors.NotFound('PDF file not found')
+        // Set the headers for the response
+        res.setHeader('Content-Type', 'application/pdf')
+        res.setHeader('Content-Disposition', `attachment; filename=${pdfPath}`)
+        // Buffer the PDF content to store it in Redis
+        const pdfChunks = [];
+        try {
+          for await (const chunk of readableStream.values()) {
+            res.write(chunk);
+            pdfChunks.push(chunk);
+          }
+          const pdfBuffer = Buffer.concat(pdfChunks);
+          await userRepository.savePDF(pdfBuffer);
+          res.end();
+        } catch (error) {
+          console.error('Error reading stream:', error);
+          throw new httpErrors.InternalServerError('Error reading stream');
+        }
+      }
     } catch (error) {
       next(error)
     }
@@ -301,6 +316,10 @@ UserRouter.route('/v1/user/:id')
         body: { firstName, lastName, email, password },
         params: { id: userId }
       } = req
+
+      // Delete the PDF file to avoid inconsistencies
+      const userRepository = new UserRepository({ id: userId })
+      await userRepository.deletePDF()
 
       try {
         response({

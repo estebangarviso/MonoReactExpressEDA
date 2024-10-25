@@ -5,7 +5,7 @@ import { RABBITMQ_URI } from '../config/index.js'
  * Object to interact with RabbitMQ server.
  * Useful for publish and subscribe messages.
  */
-export class RabbitMQProvider {
+class RabbitMQProvider {
   /**
    * Connect to RabbitMQ
    */
@@ -74,7 +74,7 @@ export class RabbitMQProvider {
   /**
    * Get instance of RabbitMQProvider
    */
-  static getInstance() {
+  static get instance() {
     if (!this._instance) this._instance = new RabbitMQProvider()
 
     return this._instance
@@ -89,3 +89,5 @@ export class RabbitMQProvider {
     this._channel = {}
   }
 }
+
+export default RabbitMQProvider.instance

@@ -9,7 +9,7 @@ const INDEX_PREFIX = 'idx:'
 
 export class RedisProvider {
   constructor(prefix) {
-    this._main = REDIS_CLUSTER_NAME ? RedisCluster() : new Redis(REDIS_URI)
+    this._main = RedisProvider.#createClient()
     this._prefix = `${process.env.APP_NAME}${prefix ? `:${prefix}` : ''}`
 
     this._main.on('connect', () => {
@@ -23,8 +23,6 @@ export class RedisProvider {
         error
       )
     })
-
-    this._sub = this._main.duplicate()
   }
 
   /**
@@ -134,21 +132,21 @@ export class RedisProvider {
    * Subscribe to a channel
    */
   async subscribe(channel) {
-    return this._sub.subscribe(channel)
+    return this.#sub.subscribe(channel)
   }
 
   /**
    * Unsubscribe from a channel
    */
   async unsubscribe(channel) {
-    return this._sub.unsubscribe(channel)
+    return this.#sub.unsubscribe(channel)
   }
 
   /**
    * On message
    */
   onMessage(message, callback) {
-    this._sub.on(message, callback)
+    this.#sub.on(message, callback)
   }
 
   /**
@@ -162,7 +160,9 @@ export class RedisProvider {
    * Close connection
    */
   async close() {
-    await this._main.quit()
+    for (const client of RedisProvider.#clients) {
+      await client.quit()
+    }
   }
 
   /**
@@ -180,4 +180,47 @@ export class RedisProvider {
     await seed()
     console.info('Database seeded')
   }
+
+  /**
+   * Multer buffer storage
+   * @return {import('multer').StorageEngine}
+   */
+  static get multerStorage() {
+    const multerClient = RedisProvider.#createClient()
+    return {
+      _handleFile: (req, file, cb) => {
+        const key = `multerBuffers:${file.originalname}`
+        multerClient.set(key, file.buffer, 'EX', 60 * 60 * 24) // 24 hours
+        cb(null, {
+          key,
+          size: file.buffer.length,
+        })
+      },
+      _removeFile: (req, file, cb) => {
+        multerClient.del(`multerBuffers:${file.originalname}`)
+        cb(null)
+      },
+    }
+  }
+
+  get #sub() {
+    if (!this._sub) this._sub = this._main.duplicate()
+    return this._sub
+  }
+
+  /**
+   * Create client
+   * @type {import('ioredis').Redis | Cluster}
+   */
+  static #createClient() {
+    const client = REDIS_CLUSTER_NAME ? RedisCluster() : new Redis(REDIS_URI)
+    RedisProvider.#clients.push(client)
+    return client
+  }
+
+  /**
+   * Redis clients
+   * @type {import('ioredis').Redis[] | Cluster[]}
+   */
+  static #clients = []
 }

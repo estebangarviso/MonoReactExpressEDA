@@ -9,7 +9,10 @@ import {
   getAllUsers,
   removeUserByID,
   updateOneUser,
-  getOneUserByEmail
+  getOneUserByEmail,
+  getCacheUserPDF,
+  saveCacheUserPDF,
+  deleteCacheUserPDF
 } from '../queries/user.js'
 import { ROLES } from '../../../constants/role.js'
 
@@ -160,5 +163,32 @@ export default class UserRepository {
     if (result) throw new httpErrors.BadRequest('Bad credentials')
 
     return user
+  }
+
+  async getPDF() {
+    if (!this._id)
+      throw new httpErrors.BadRequest('Missing required field: userId')
+
+    const buffer = await getCacheUserPDF(this._id)
+
+    return buffer
+  }
+
+  /**
+   * Save a PDF file in cache
+   * @param {Buffer} pdfBuffer
+   */
+  async savePDF(pdfBuffer) {
+    if (!this._id)
+      throw new httpErrors.BadRequest('Missing required field: userId')
+
+    await saveCacheUserPDF(this._id, pdfBuffer)
+  }
+
+  async deletePDF() {
+    if (!this._id)
+      throw new httpErrors.BadRequest('Missing required field: userId')
+
+    await deleteCacheUserPDF(this._id)
   }
 }

@@ -1,4 +1,4 @@
-import { PDFGenerationStatus } from '@demo/common';
+import { PDF_CHANNEL, PDFGenerationStatus } from '@demo/common';
 import { Suspense, useEffect, useRef, useState } from 'react';
 import { SSEPDFChannelProvider } from '#libs/ui';
 import { default as useAsyncUserBoxStore } from '../../../stores/user-box.store.js';
@@ -13,7 +13,16 @@ const UsersBox = () => {
 	const progress = useAsyncUserBoxStore((state) => state.progress);
 	const pdfState = useAsyncUserBoxStore((state) => state.pdfState);
 	const isLoading = useAsyncUserBoxStore((state) => state.loading);
+	const sse = useAsyncUserBoxStore((state) => state.sse);
 	const [users, setUsers] = useState([]);
+
+	/**
+	 * Handle going back to the users list
+	 */
+	const handleGoBack = () => {
+		sse?.close();
+		setUser(null);
+	};
 
 	/**
 	 * Download PDF invoice for selected invoice
@@ -45,7 +54,7 @@ const UsersBox = () => {
 				<SSEPDFChannelProvider>
 					<button
 						className={`flex items-center justify-center border-2 border-blue-500 rounded px-4 py-2 text-blue-500 font-bold transition-colors duration-300 space-x-4 hover:bg-blue-500 hover:text-white ${pdfState === PDFGenerationStatus.READY ? 'motion-safe:animate-bounce' : ''}`}
-						onClick={() => setUser(null)}
+						onClick={handleGoBack}
 						type='button'
 					>
 						<i className='mdi-arrow-left text-2xl' />

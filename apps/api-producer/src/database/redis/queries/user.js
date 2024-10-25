@@ -2,6 +2,7 @@ import { getUniqueID } from '../../../libs/crypto.js'
 import { RedisProvider } from '../provider.js'
 
 const redis = new RedisProvider('user')
+const pdfRedis = new RedisProvider('pdf:user')
 const INDEXES = ['email']
 
 /**
@@ -82,4 +83,35 @@ export const getOneUserByEmail = async email => {
   const user = await redis.getByIndex(email)
 
   return user
+}
+
+
+/**
+ * Save cache temporary user pdf file buffer in database
+ *
+ * @param {string} userId
+ * @param {Buffer} pdfBuffer
+ * @returns {Promise<void>}
+ */
+export const saveCacheUserPDF = async (userId, pdfBuffer) => {
+  const seconds = 60 * 10 // 10 minutes
+  await pdfRedis.set(userId, pdfBuffer.toString('base64'), null, { seconds })
+}
+
+/**
+ * Get cached user pdf file buffer from database
+ *
+ * @param {string} userId
+ * @returns {Promise<Buffer>}
+ */
+export const getCacheUserPDF = async userId => {
+  const pdfBuffer = await pdfRedis.get(userId)
+
+  if (!pdfBuffer) return null
+
+  return Buffer.from(pdfBuffer, 'base64')
+}
+
+export const deleteCacheUserPDF = async userId => {
+  await pdfRedis.del(userId, false)
 }

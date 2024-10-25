@@ -60,6 +60,10 @@ const useAsyncUserBoxStore = create((set, get) => ({
 		a.href = url;
 		a.download = `user-${selectedUserId}.pdf`;
 		a.click();
+		const setEventSource = get().setEventSource;
+		const setPdfState = get().setPdfState;
+		setEventSource(undefined);
+		setPdfState(PDFGenerationStatus.IDLE);
 	},
 	listUsers: async () => {
 		try {
@@ -95,8 +99,10 @@ const useAsyncUserBoxStore = create((set, get) => ({
 	},
 	ready: false,
 	selectedUser: null,
+	setEventSource: (sse) => set({ sse }),
 	setPdfState: (state) => set({ pdfState: state }),
 	setUser: (user) => set({ selectedUser: user }),
+	sse: undefined,
 }));
 
 export default useAsyncUserBoxStore;

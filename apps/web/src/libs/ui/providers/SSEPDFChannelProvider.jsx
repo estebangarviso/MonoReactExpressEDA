@@ -14,6 +14,10 @@ export const SSEPDFChannelProvider = ({ children }) => {
 	const downloadUserPdf = useAsyncUserBoxStore(
 		(state) => state.downloadUserPdf,
 	);
+	const setEventSource = useAsyncUserBoxStore(
+		(state) => state.setEventSource,
+	);
+	const eventSource = useAsyncUserBoxStore((state) => state.sse);
 
 	useEffect(() => {
 		if (pdfState === PDFGenerationStatus.READY && !pdfSent) {
@@ -27,19 +31,14 @@ export const SSEPDFChannelProvider = ({ children }) => {
 
 	useEffect(() => {
 		let mount = true;
-		let eventSource;
 		let timer;
 		const createEvents = () => {
-			// close connection if open
-			if (eventSource) {
-				eventSource.close();
-			}
-			// establishing an SSE connection
-			eventSource = new EventSource(endpoint);
-			eventSource.addEventListener('open', () => {
+			const sse = new EventSource(endpoint);
+			setEventSource(sse);
+			sse.addEventListener('open', () => {
 				console.log('SSE connection established');
 			});
-			eventSource.addEventListener(PDF_CHANNEL, (event) => {
+			sse.addEventListener(PDF_CHANNEL, (event) => {
 				// if the component is mounted, we set the state
 				// of the list with the received data
 				if (mount) {
@@ -49,7 +48,7 @@ export const SSEPDFChannelProvider = ({ children }) => {
 			});
 			// if an error occurs, we wait a second
 			// and call the connection function again
-			eventSource.addEventListener('error', () => {
+			sse.addEventListener('error', () => {
 				timer = setTimeout(() => {
 					createEvents();
 				}, 1000);
@@ -62,7 +61,7 @@ export const SSEPDFChannelProvider = ({ children }) => {
 		return () => {
 			mount = false;
 			clearTimeout(timer);
-			eventSource.close();
+			eventSource?.close();
 		};
 	}, []);
 

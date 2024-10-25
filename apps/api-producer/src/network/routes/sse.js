@@ -47,10 +47,16 @@ SSERouter.route(`/v1/sse/pdf`).get(async (req, res) => {
   // send headers for event-stream connection
   res.write('\n')
   res.flush()
-  // TODO: unsubcribe from redis when the connection is closed
-  res.on('close', () => {
-    console.log('Connection closed')
-    void socketEventRepository.unsub()
+  res.on('close', async () => {
+    console.log('Connection SSE closed')
+    await socketEventRepository.unsub()
+    res.end()
+  })
+
+  res.on('error', async (error) => {
+    console.error('Error on SSE connection', error)
+    await socketEventRepository.unsub()
+    res.end()
   })
 })
 
