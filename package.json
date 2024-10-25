@@ -16,8 +16,11 @@
     "preview:release": "turbo preview:release",
     "prepare": "node .husky/install.mjs",
     "format": "turbo format",
-    "pm2:dev": "env -e dev -m debug --log debug : pm2 start ecosystem.config.js",
-    "pm2:release": "env -e release -m debug --log debug : pm2 start ecosystem.config.js"
+    "compose:local": "docker-compose --profile local up -d",
+    "compose:web": "docker-compose --profile web up -d",
+    "compose:api": "docker-compose --profile api up -d",
+    "compose:worker": "docker-compose --profile worker up -d",
+    "compose:webserver": "docker-compose --profile webserver up -d"
   },
   "author": "",
   "license": "MIT",

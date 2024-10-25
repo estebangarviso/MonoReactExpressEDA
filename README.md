@@ -67,13 +67,33 @@ __*Important: Allow docker to create volumes in this directory. For Docker Deskt
 
     Open your web browser and go to `http://localhost:3003` to access the frontend, and `http://localhost:4004` to access the backend producer API.
 
+## Available Scripts
+
+The following scripts are available in the monorepo
+
+| Script                      | Description                                       |
+| --------------------------- | ------------------------------------------------- |
+| `npm run install`           | Install all dependencies in all packages.         |
+| `npm run start:dev`         | Start all packages in development mode.           |
+| `npm run start:release`     | Start all packages in production mode.            |
+| `npm run build:dev`         | Build all packages in development mode.           |
+| `npm run build:release`     | Build all packages in production mode.            |
+| `npm run preview:dev`       | Preview all packages in development mode.         |
+| `npm run preview:release`   | Preview all packages in production mode.          |
+| `npm run format`            | Format all packages.                              |
+| `npm run compose:local`     | Start local services using Docker Compose.        |
+| `npm run compose:web`       | Start web services using Docker Compose.          |
+| `npm run compose:api`       | Start api services using Docker Compose.          |
+| `npm run compose:worker`    | Start worker services using Docker Compose.       |
+| `npm run compose:webserver` | Start webserver services using Docker Compose.    |
+
 ## WARNING 
 
 - The application is for development purposes only. Do not use it in a production event-streaming are not validating user requests and are not secure. Must implement security measures before deploying to production like ABAC, RBAC, JWT, etc. In this application, we are not using any of these security measures and also stream data is not encrypted and can be intercepted by any other user in the same network.
 
 ## Production Deployment
 
-Use `docker-compose.yml` file to deploy the application in production. Make sure to update the .env file for `docker-compose.yml`, you have to rename the `.env.example` file to `.env` and update the values as per your setup. Also there's a `docker-compose.dev.yml` file which is used for development purposes and runs rabbitmq and redis services locally plus the services in the docker containers.
+Use `docker-compose.yml` file to deploy the application in production or use local profile to run required containers to run the app locally (RabbitMQ and Redis). Make sure to update the .env file for `docker-compose.yml`, you have to rename the `.env.example` file to `.env` and update the values as per your setup.
 
 Then run the following command to build the images:
 
