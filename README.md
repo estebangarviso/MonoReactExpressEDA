@@ -48,26 +48,22 @@ __*Important: Allow docker to create volumes in this directory. For Docker Deskt
     git clone https://github.com/MonoReactExpressEDA.git .
     ```
 
-2. Search and replace next references in the project:
-
-    - `(((packageManager)))` with `pnpm@<your_exact_version>` or `npm@<your_exact_version>` (e.g. `npm@7.24.0`)
-
-3. Start the containers to run local redis and rabbitmq services:
+2. Start the containers to run local redis and rabbitmq services:
 
     ```bash
     docker-compose up -d
     ```
 
-4. Read `README.md` inside Add the secrets inside `apps/(api-*|web)/env` directory and change them as per your setup.
+3. Read `README.md` inside Add the secrets inside `apps/(api-*|web)/env` directory and change them as per your setup.
 
-5. Install and start monorepo packages:
+4. Install and start monorepo packages:
     
     ```bash
     pnpm run install
     pnpm run start:(dev|release)
     ```
 
-6. Access the application:
+5. Access the application:
 
     Open your web browser and go to `http://localhost:3003` to access the frontend, and `http://localhost:4004` to access the backend producer API.
 
